@@ -22,6 +22,7 @@ purpose_model = "gemini-3.5-flash"
 
 
 previous_interaction_id = None
+full_conversation = ""
 while True:
     if previous_interaction_id is None:
         prompt = input("Tell me your goal, niche, and current platform stats: ")
@@ -32,7 +33,7 @@ while True:
     if prompt.lower() == "nothing":
         break
     
-
+    
     interaction1 = client.interactions.create(
         model="gemini-3.5-flash",
         input=prompt,
@@ -47,5 +48,10 @@ while True:
         
     )
     print(interaction1.output_text)
+    full_conversation += interaction1.output_text
     previous_interaction_id = interaction1.id
 
+with open("content_strategy.txt", "w", encoding="utf-8") as file:
+    file.write(full_conversation)
+
+print("Your content strategy has been saved to content_strategy.txt")

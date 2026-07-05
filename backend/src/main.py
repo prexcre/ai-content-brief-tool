@@ -16,27 +16,18 @@ class SpecificInfo(BaseModel):
     content_angles: str = Field(description="The specific content approaches or hooks that resonate with an audience in a given niche. Basically the 'why would someone click on this' framing for a piece of content.")
     full_brief: str = Field(description="A comprehensive, in-depth content strategy brief covering all recommendations, growth tactics, competitor insights, and a detailed action plan based on everything the user has provided.")
 
-purpose_model = "gemini-3.5-flash"
 
 
 
 
-previous_interaction_id = None
-full_conversation = ""
-while True:
-    if previous_interaction_id is None:
-        prompt = input("Tell me your goal, niche, and current platform stats: ")
-    else:
-        prompt = input("You: ")
-        
-    
-    if prompt.lower() == "nothing":
-        break
+
+
+def generate_content_strategy(message: str, previous_interaction_id: str = None):
     
     
     interaction1 = client.interactions.create(
         model="gemini-3.5-flash",
-        input=prompt,
+        input=message,
         system_instruction="You are an AI Content Briefing Tool that is extremely objective and logical. You look for trends in posts and publications across many niches and industries in content creation and return the best content creation strategies for users to use to generate significant viewership and revenue. You look at (not limited to) Tiktok, Instagram, Youtube, and Twitter to figure out what works and what doesn't to provide users with the most effective strategies based on the goals and detials they provide to you. You respond with clear, structured sections that are cohesive and extensive.  ",
 
         previous_interaction_id=previous_interaction_id,
@@ -44,14 +35,13 @@ while True:
             "type": "text",
             "mime_type": "application/json",
             "schema": SpecificInfo.model_json_schema()
-        }
+        } 
         
     )
-    print(interaction1.output_text)
-    full_conversation += interaction1.output_text
-    previous_interaction_id = interaction1.id
+    
+    
+    
 
-with open("content_strategy.txt", "w", encoding="utf-8") as file:
-    file.write(full_conversation)
+    return interaction1.output_text, interaction1.id
 
-print("Your content strategy has been saved to content_strategy.txt")
+

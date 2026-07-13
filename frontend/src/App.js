@@ -8,6 +8,7 @@ function App() {
   const [response, setResponse] = useState("")
   const [previous_interaction_id, setPreviousInteractionId] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
 
 
@@ -21,15 +22,16 @@ function App() {
       <p>{message}</p>
       <button onClick={ async () =>{
         setLoading(true)
+        setError(null)
 
 
-
+      try {
         const res = await fetch("http://127.0.0.1:8000/strategy", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({message: message, previous_interaction_id: previous_interaction_id}),
         });
-        
+
         const data = await res.json();
         console.log(data)
 
@@ -37,12 +39,22 @@ function App() {
         console.log(parsedStrategy)
 
         setResponse(parsedStrategy)
-        setLoading(false)
+      } catch (err) {
+        console.log(err)
+        setError(err.message)
+
+      }
+        
+        
+        
+      setLoading(false)
 
 
 
 
       } }>{loading ? "Generating...": "Submit"}</button>
+
+      {error && <p style={{color: "red"}}>{error}</p>}
 
       {response && (
         <div>

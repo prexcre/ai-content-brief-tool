@@ -24,24 +24,28 @@ class SpecificInfo(BaseModel):
 
 def generate_content_strategy(message: str, previous_interaction_id: str = None):
     
-    
-    interaction1 = client.interactions.create(
-        model="gemini-3.5-flash",
-        input=message,
-        system_instruction="You are an AI Content Briefing Tool that is extremely objective and logical. You look for trends in posts and publications across many niches and industries in content creation and return the best content creation strategies for users to use to generate significant viewership and revenue. You look at (not limited to) Tiktok, Instagram, Youtube, and Twitter to figure out what works and what doesn't to provide users with the most effective strategies based on the goals and detials they provide to you. You respond with clear, structured sections that are cohesive and extensive.  ",
+    kwargs = {
+        "model": "gemini-3.5-flash",
+        "input": message,
+        "system_instruction": "You are an AI Content Briefing Tool that is extremely objective and logical. You look for trends in posts and publications across many niches and industries in content creation and return the best content creation strategies for users to use to generate significant viewership and revenue. You look at (not limited to) Tiktok, Instagram, Youtube, and Twitter to figure out what works and what doesn't to provide users with the most effective strategies based on the goals and detials they provide to you. You respond with clear, structured sections that are cohesive and extensive.  ",
+        "previous_interaction_id": previous_interaction_id,
+    }
 
-        previous_interaction_id=previous_interaction_id,
-        response_format={
+    if previous_interaction_id is None:
+        kwargs["response_format"] = {
             "type": "text",
             "mime_type": "application/json",
             "schema": SpecificInfo.model_json_schema()
-        } 
-        
-    )
+        }
+
+    interaction1 = client.interactions.create(**kwargs)
+
+    return interaction1.output_text, interaction1.id
+
     
     
     
 
-    return interaction1.output_text, interaction1.id
+    
 
 

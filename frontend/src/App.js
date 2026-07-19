@@ -5,10 +5,11 @@ import {useState} from 'react'
 function App() {
   
   const [message, setMessage] = useState("")
-  const [response, setResponse] = useState("")
+  
   const [previous_interaction_id, setPreviousInteractionId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [conversation, setConversation] = useState([]);
 
 
 
@@ -35,10 +36,34 @@ function App() {
         const data = await res.json();
         console.log(data)
 
-        const parsedStrategy = JSON.parse(data.response);
-        console.log(parsedStrategy)
+        //const parsedStrategy = JSON.parse(data.response);
+        //console.log(parsedStrategy)
 
-        setResponse(parsedStrategy)
+        let brief = null;
+        let plainAnswer = null;
+
+        try {
+          brief = JSON.parse(data.response);
+
+        } catch {
+          plainAnswer = data.response;
+          
+        }
+
+        console.log("brief:", brief)
+        console.log("plainAnswer: ", plainAnswer)
+
+        
+
+        
+        setPreviousInteractionId(data.interaction_id)
+
+        const newEntry = { userMessage: message, brief: brief, plainAnswer: plainAnswer };
+        setConversation([...conversation, newEntry]);
+        setMessage("")
+
+
+
       } catch (err) {
         console.log(err)
         setError(err.message)
@@ -56,24 +81,14 @@ function App() {
 
       {error && <p style={{color: "red"}}>{error}</p>}
 
-      {response && (
-        <div>
-          <h2>Target Audience</h2>
-          <p>{response.target_audience}</p>
+      {conversation.map((entry, index) => (
+  <div key={index}>
+    <p><strong>You:</strong> {entry.userMessage}</p>
 
-          <h2>Best Platform</h2>
-          <p>{response.best_platform}</p>
-
-          <h2>Posting Frequency</h2>
-          <p>{response.posting_frequency}</p>
-
-          <h2>Content Angles</h2>
-          <p>{response.content_angles}</p>
-
-          <h2>Full Brief</h2>
-          <p>{response.full_brief}</p>
-         </div> 
-      )}
+    {entry.brief && <p><strong>Brief:</strong> {entry.brief.full_brief}</p>}
+    {entry.plainAnswer && <p><strong>Answer:</strong> {entry.plainAnswer}</p>}
+  </div>
+))}
 
 
 

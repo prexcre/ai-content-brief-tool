@@ -36,7 +36,28 @@ function App() {
     <div className="bubble user-bubble">{entry.userMessage}</div>
 
     {entry.brief && (
-      <div className="bubble assistant-bubble">{entry.brief.full_brief}</div>
+      <div className="brief-card">
+      <div className="brief-field">
+        <span className="brief-label">Target Audience</span>
+        <p>{entry.brief.target_audience}</p>
+      </div>
+      <div className="brief-field">
+        <span className="brief-label">Best Platform</span>
+        <p>{entry.brief.best_platform}</p>
+      </div>
+      <div className="brief-field">
+        <span className="brief-label">Posting Frequency</span>
+        <p>{entry.brief.posting_frequency}</p>
+      </div>
+      <div className="brief-field">
+        <span className="brief-label">Content Angles</span>
+        <p>{entry.brief.content_angles}</p>
+      </div>
+      <div className="brief-field brief-field-full">
+        <span className="brief-label">Full Brief</span>
+        <p>{entry.brief.full_brief}</p>
+      </div>
+    </div>
     )}
     {entry.plainAnswer && (
       <div className="bubble assistant-bubble">{entry.plainAnswer}</div>

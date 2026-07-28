@@ -265,3 +265,45 @@ body {
 .input-bar button:active {
   transform: scale(0.97);
 }
+.brief-card {
+  align-self: flex-start;
+  max-width: 85%;
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: var(--sp-6);
+  box-shadow: var(--shadow-card);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+
+.brief-field {
+  background: var(--glass-overlay);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: var(--sp-4);
+}
+
+.brief-field-full {
+  grid-column: span 2;
+}
+
+.brief-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.brief-field p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-line;
+}

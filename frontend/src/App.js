@@ -9,6 +9,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [conversation, setConversation] = useState([]);
+  const [copiedIndex, setCopiedIndex] = useState(null)
 
   return (
     <div className="app-shell">
@@ -56,7 +57,28 @@ function App() {
       <div className="brief-field brief-field-full">
         <span className="brief-label">Full Brief</span>
         <p>{entry.brief.full_brief}</p>
+        
       </div>
+      <button
+        className="save-brief-btn"
+        onClick={() => {
+          const text = `Target Audience: ${entry.brief.target_audience}\n\nBest Platform: ${entry.brief.best_platform}\n\nPosting Frequency: ${entry.brief.posting_frequency}\n\nContent Angles: ${entry.brief.content_angles}\n\nFull Brief:\n${entry.brief.full_brief}`;
+          navigator.clipboard.writeText(text);
+          setCopiedIndex(index)
+          setTimeout(() => setCopiedIndex(null), 2000)
+        }}
+
+        
+
+        
+        
+        >
+          {copiedIndex === index ? "Copied!": "Copy Brief"}
+          
+        </button>
+
+
+        
     </div>
     )}
     {entry.plainAnswer && (
@@ -64,6 +86,18 @@ function App() {
     )}
   </div>
 ))}
+
+
+{loading && (
+  <div className="message-group">
+    <div className="bubble assistant-bubble typing-indicator">
+      <span className="dot"></span>
+      <span className="dot"></span>
+      <span className="dot"></span>
+    </div>
+  </div>
+)}
+
         </div>
 
         <div className="input-bar">
@@ -75,6 +109,7 @@ function App() {
     e.target.style.height = e.target.scrollHeight + "px";
   }}
   rows={1}
+  placeholder="Tell me about your content goals, niche, and current stats..."
 ></textarea>
 
           <button onClick={ async () => {

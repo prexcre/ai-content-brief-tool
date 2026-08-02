@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import {useState} from 'react'
+import { supabase } from './supabaseClient';
 
 function App() {
 
@@ -10,6 +11,8 @@ function App() {
   const [error, setError] = useState(null)
   const [conversation, setConversation] = useState([]);
   const [copiedIndex, setCopiedIndex] = useState(null)
+
+  console.log("Supabase client:", supabase);
 
   return (
     <div className="app-shell">

@@ -14,3 +14,7 @@ Add rate limitng middleware before shipping to prevent backend crashes and quota
 - [ ] Supabase: accounts + persistent saved briefs
 - [ ] Stripe or basic paywall
 - [ ] Deployment (backend host + frontend host, env vars in production)
+
+## Ideas for v2+ (post-MVP)
+- [ ] Living Canvas: two-panel layout, structured cards on the right
+- [ ] Gamified/engaging example discovery — friend's idea: showing "what works" examples in a more interactive/entertaining format (swipeable? feed-like? needs more definition) rather than plain text

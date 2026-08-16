@@ -18,6 +18,7 @@ function App() {
   const [authPassword, setAuthPassword] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [currentBriefId, setCurrentBriefId] = useState(null);
 
   const loadingMessages = [
     "Scanning what's working right now...",
@@ -41,6 +42,24 @@ function App() {
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   };
 
+  const buildFlatConversation = (briefObj) => {
+    const entries = [{
+      userMessage: briefObj.userMessage,
+      brief: briefObj.brief,
+      plainAnswer: null,
+      timestamp: briefObj.timestamp,
+    }];
+    (briefObj.followUps || []).forEach((f) => {
+      entries.push({
+        userMessage: f.question,
+        brief: null,
+        plainAnswer: f.answer,
+        timestamp: f.timestamp,
+      });
+    });
+    return entries;
+  };
+
   const loadBriefs = async () => {
     const { data, error } = await supabase
       .from('briefs')
@@ -50,7 +69,8 @@ function App() {
     if (error) {
       console.log("Load error:", error);
     } else {
-      const loadedConversation = data.map((row) => ({
+      const briefObjs = data.map((row) => ({
+        dbId: row.id,
         userMessage: row.user_message,
         timestamp: row.created_at,
         brief: {
@@ -60,10 +80,19 @@ function App() {
           content_angles: row.content_angles,
           full_brief: row.full_brief,
         },
-        plainAnswer: null,
+        followUps: row.follow_ups || [],
+        lastInteractionId: row.last_interaction_id || null,
       }));
-      setConversation(loadedConversation);
-      setSavedBriefs(loadedConversation);
+      setSavedBriefs(briefObjs);
+
+      if (briefObjs.length > 0) {
+        const mostRecent = briefObjs[briefObjs.length - 1];
+        setConversation(buildFlatConversation(mostRecent));
+        setCurrentBriefId(mostRecent.dbId);
+        setPreviousInteractionId(mostRecent.lastInteractionId);
+      } else {
+        setConversation([]);
+      }
     }
   };
 
@@ -125,6 +154,7 @@ function App() {
     setSession(null);
     setConversation([]);
     setSavedBriefs([]);
+    setCurrentBriefId(null);
   };
 
   return (
@@ -195,6 +225,7 @@ function App() {
                 setPreviousInteractionId(null);
                 setMessage("");
                 setError(null);
+                setCurrentBriefId(null);
               }}>+ New Brief</button>
             </div>
 
@@ -209,7 +240,9 @@ function App() {
                     key={index}
                     className="history-item"
                     onClick={() => {
-                      setConversation([entry]);
+                      setConversation(buildFlatConversation(entry));
+                      setCurrentBriefId(entry.dbId);
+                      setPreviousInteractionId(entry.lastInteractionId);
                       setError(null);
                     }}
                   >
@@ -328,26 +361,70 @@ function App() {
 
                   setPreviousInteractionId(data.interaction_id)
 
-                  const newEntry = { userMessage: message, brief: brief, plainAnswer: plainAnswer, timestamp: new Date().toISOString() };
+                  const nowStamp = new Date().toISOString();
 
                   if (brief) {
-                    const { error: insertError } = await supabase.from('briefs').insert({
-                      user_id: session.user.id,
-                      user_message: message,
-                      target_audience: brief.target_audience,
-                      best_platform: brief.best_platform,
-                      posting_frequency: brief.posting_frequency,
-                      content_angles: brief.content_angles,
-                      full_brief: brief.full_brief,
-                    });
+                    const { data: insertedRow, error: insertError } = await supabase
+                      .from('briefs')
+                      .insert({
+                        user_id: session.user.id,
+                        user_message: message,
+                        target_audience: brief.target_audience,
+                        best_platform: brief.best_platform,
+                        posting_frequency: brief.posting_frequency,
+                        content_angles: brief.content_angles,
+                        full_brief: brief.full_brief,
+                        follow_ups: [],
+                        last_interaction_id: data.interaction_id,
+                      })
+                      .select()
+                      .single();
+
                     if (insertError) {
                       console.log("Insert error:", insertError);
                     } else {
-                      setSavedBriefs([...savedBriefs, newEntry]);
+                      const newBriefObj = {
+                        dbId: insertedRow.id,
+                        userMessage: message,
+                        timestamp: nowStamp,
+                        brief: brief,
+                        followUps: [],
+                        lastInteractionId: data.interaction_id,
+                      };
+                      setSavedBriefs([...savedBriefs, newBriefObj]);
+                      setCurrentBriefId(insertedRow.id);
                     }
+
+                    setConversation([...conversation, { userMessage: message, brief: brief, plainAnswer: null, timestamp: nowStamp }]);
+
+                  } else if (plainAnswer) {
+                    if (currentBriefId) {
+                      const targetBrief = savedBriefs.find((b) => b.dbId === currentBriefId);
+                      const followUpEntry = { question: message, answer: plainAnswer, timestamp: nowStamp };
+                      const updatedFollowUps = [...(targetBrief?.followUps || []), followUpEntry];
+
+                      const { error: updateError } = await supabase
+                        .from('briefs')
+                        .update({
+                          follow_ups: updatedFollowUps,
+                          last_interaction_id: data.interaction_id,
+                        })
+                        .eq('id', currentBriefId);
+
+                      if (updateError) {
+                        console.log("Update error:", updateError);
+                      } else {
+                        setSavedBriefs(savedBriefs.map((b) =>
+                          b.dbId === currentBriefId
+                            ? { ...b, followUps: updatedFollowUps, lastInteractionId: data.interaction_id }
+                            : b
+                        ));
+                      }
+                    }
+
+                    setConversation([...conversation, { userMessage: message, brief: null, plainAnswer: plainAnswer, timestamp: nowStamp }]);
                   }
 
-                  setConversation([...conversation, newEntry]);
                   setMessage("")
 
                 } catch (err) {

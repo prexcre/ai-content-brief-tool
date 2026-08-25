@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
@@ -100,6 +99,7 @@ function App() {
     if (session) {
       loadBriefs();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   useEffect(() => {
@@ -114,6 +114,7 @@ function App() {
       }, 2500);
     }
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   const handleSignUp = async () => {

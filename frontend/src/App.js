@@ -342,7 +342,7 @@ function App() {
                 setError(null)
 
                 try {
-                  const res = await fetch("http://127.0.0.1:8000/strategy", {
+                  const res = await fetch("https://ai-content-brief-tool.onrender.com/strategy", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message: message, previous_interaction_id: previous_interaction_id }),

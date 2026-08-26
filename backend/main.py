@@ -12,7 +12,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
-    "https://ai-content-brief-tool.vercel.app/"
+    "https://ai-content-brief-tool.vercel.app"
 ]
 
 app.add_middleware(

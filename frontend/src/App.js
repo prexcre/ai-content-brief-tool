@@ -327,6 +327,7 @@ function App() {
             </div>
 
             <div className="input-bar">
+              <p className="latency-note">First message may take up to a minute while things spin up — after that, responses are much faster.</p>
               <textarea
                 value={message}
                 onChange={(e) => {
